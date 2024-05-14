@@ -1,4 +1,6 @@
 let buffer = '0';
+let runningTotal = 0;
+let previousOperator = null;
 const screen = document.querySelector('.screen');
 
 const buttonClick = (value) => {
@@ -16,7 +18,33 @@ const handleNumber = (number) => {
     } else {
         buffer += number;
     }
-    console.log(buffer);
+}
+
+
+const handleMath = (value) => {
+    if(buffer === '0') {
+        return;
+    }
+    const intBuffer = parseInt(buffer);
+    if(runningTotal === 0) {
+        runningTotal = intBuffer;
+    } else {
+        flushOperation(intBuffer);
+    }
+    previousOperator = value;
+    buffer = '0';
+}
+
+const flushOperation = (intBuffer) => {
+    if(previousOperator === '+') {
+        runningTotal += intBuffer;
+    } else if(previousOperator === '-') {
+        runningTotal -= intBuffer;
+    } else if(previousOperator === '×') {
+        runningTotal *= intBuffer;
+    } else {
+        runningTotal /= intBuffer;
+    }
 }
 
 const handleSymbol = (symbol) => {
@@ -26,7 +54,13 @@ const handleSymbol = (symbol) => {
             buffer = '0';
             break;
         case '=':
-            console.log('equals');
+            if(previousOperator === null) {
+                return;
+            }
+            flushOperation(parseInt(buffer));
+            previousOperator = null;
+            buffer = '' + runningTotal;
+            runningTotal = 0;
             break;
         case '←':
             if(buffer.length === 1) {
@@ -36,11 +70,10 @@ const handleSymbol = (symbol) => {
             }
             break;
         case '+':
-            break;
         case '-':
+        case '×':
+            handleMath(symbol);
             break;
-        case 'x':
-            console.log('math symbol')
     }
 }
 
